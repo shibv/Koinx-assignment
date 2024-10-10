@@ -27,12 +27,11 @@ app.use('/deviation', deviationRouter);
 
 app.use(errorHandler);
 
-//Schedule background job to run every 2 hours
+//Schedule background job to run every 5 minutes for testing purpose 
 cron.schedule('*/5 * * * * *', async () => {
   console.log('Running background job to fetch crypto data');
   await fetchAndStoreCryptoData();
 });
-
 
 
 app.listen(PORT, () => {
