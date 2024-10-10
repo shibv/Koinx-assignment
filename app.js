@@ -1,19 +1,45 @@
-import express from 'express'
+import express from 'express';
+import cron from 'node-cron';
 import dotenv from 'dotenv';
-import connectDatabase from './config/database.js';
-dotenv.config();
+import statsRouter from './routes/stats.js';
+import deviationRouter from './routes/deviation.js';
+import errorHandler from './middleware/errorHandler.js';
+import { fetchAndStoreCryptoData } from './services/cryptoService.js';
+import connectDatabase from './config/database.js'
 
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 connectDatabase();
+
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.send("Hey hi!!");
-})
+
+app.get('/', (req, res) => {
+    res.send('Welcome to the Crypto Stats API!');
+  });
+
+
+app.use('/stats', statsRouter);
+app.use('/deviation', deviationRouter);
+
+app.use(errorHandler);
+
+//Schedule background job to run every 2 hours
+cron.schedule('*/5 * * * * *', async () => {
+  console.log('Running background job to fetch crypto data');
+  await fetchAndStoreCryptoData();
+});
+
+
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
+
+
+
+
+
